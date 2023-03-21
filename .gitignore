@@ -1,0 +1,22 @@
+# Ignore all files by default
+*
+
+# Allow git files
+!.gitignore
+!.gitattributes
+
+# Allow GitHub files
+!.github/
+!.github/**/*
+
+# Allow Markdown files
+!*.md
+
+# Allow Docker files
+!.dockerignore
+!Dockerfile
+!docker-compose.yml
+!docker-compose.yaml
+
+# Allow scripts
+!*.sh

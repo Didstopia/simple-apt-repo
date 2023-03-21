@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+
+  repo:
+    # image: ghcr.io/didstopia/simple-apt-repo:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: repo
+    # restart: unless-stopped
+    # ports:
+    #   - 80:80
+    # tty: true # Enable TTY (required for GPG key generation)
+    volumes:
+      - ./data/repo:/repo
+      - ./data/packages:/packages
+      - ./data/keys:/keys
+    # environment:
+    #   FOO: bar
