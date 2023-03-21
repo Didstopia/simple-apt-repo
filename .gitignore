@@ -12,6 +12,9 @@
 # Allow Markdown files
 !*.md
 
+# Allow LICENSE files
+!LICENSE
+
 # Allow Docker files
 !.dockerignore
 !Dockerfile
