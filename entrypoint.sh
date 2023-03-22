@@ -35,16 +35,23 @@ fi
 #   echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
 # fi
 
-## TODO: If this works, we need to account for both GitHub and non-GitHub environments!
-if [ -n "${RUNNER_WORKSPACE}" ]; then
-  echo "::notice::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting WORKSPACE_PATH to the same value ..."
-  export WORKSPACE_PATH="${RUNNER_WORKSPACE}"
-
-  # Export WORKSPACE_PATH as an output variable
-  echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
+# Print out both GITHUB_WORKSPACE and RUNNER_WORKSPACE
+# if they are set and not empty
+if [ -n "${GITHUB_WORKSPACE}" ]; then
+  echo "::notice::GITHUB_WORKSPACE is set to ${GITHUB_WORKSPACE}"
 fi
-# WORKSPACE_PATH="${RUNNER_WORKSPACE:-$WORKSPACE_PATH}"
-# echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
+if [ -n "${RUNNER_WORKSPACE}" ]; then
+  echo "::notice::RUNNER_WORKSPACE is set to ${RUNNER_WORKSPACE}"
+fi
+
+## TODO: If this works, we need to account for both GitHub and non-GitHub environments!
+if [ -n "${GITHUB_WORKSPACE}" ]; then
+  # echo "::notice::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, setting WORKSPACE_PATH to the same value ..."
+  export WORKSPACE_PATH="${GITHUB_WORKSPACE}"
+fi
+
+# Export WORKSPACE_PATH as an output variable
+echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
 
 # If GITHUB_WORKSPACE is set, then we should modify the folder environment variables
 # so that they're relative to the GITHUB_WORKSPACE.
