@@ -11,10 +11,10 @@ branding:
 # The inputs for the custom GitHub Action.
 inputs:
 
-  image-version:
-    description: 'The version of the Docker image to use. (optional, eg. `"master"`, default: `"latest"`)'
-    required: false
-    default: 'latest'
+  # image-version:
+  #   description: 'The version of the Docker image to use. (optional, eg. `"master"`, default: `"latest"`)'
+  #   required: false
+  #   default: 'latest'
 
   # repo-relative:
   #   description: 'Whether to use paths relative to the GitHub Workspace directory. (optional, eg. `"false"`, default: `"true"`)'
@@ -153,7 +153,7 @@ runs:
   #   - ${{ inputs.token }}
   env:
     #
-    REPO_USE_RELATIVE: ${{ inputs.repo-relative }}
+    # REPO_USE_RELATIVE: ${{ inputs.repo-relative }}
     #
     REPO_DIR: ${{ inputs.repo-path }}
     REPO_PACKAGES_DIR: ${{ inputs.packages-path }}
