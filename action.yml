@@ -1,0 +1,169 @@
+# Basic information for the custom GitHub Action.
+name: 'Simple Apt Repository'
+description: 'Quickly and easily create, update and manage an apt repository.'
+author: 'Didstopia'
+
+# Branding for the custom GitHub Action.
+branding:
+  icon: 'globe'
+  color: 'green'
+
+# The inputs for the custom GitHub Action.
+inputs:
+
+  repo-path:
+    description: 'The path inside the container for the apt repository root, relative to the GitHub Workspace path. (optional, eg. `"/my-repo"`, default: `"/repo"`)'
+    required: false
+    default: '/repo'
+
+  packages-path:
+    description: 'The path inside the container for the .DEB packages to add to the apt repository, relative to the GitHub Workspace path. (optional, eg. `"/my-packages"`, default: `"/packages"`)'
+    required: false
+    default: '/packages'
+
+  keys-path:
+    description: 'The path inside the container for the signing keys to use for signing the apt repository and its contents, relative to the GitHub Workspace path. (optional, eg. `"/my-keys"`, default: `"/keys"`)'
+    required: false
+    default: '/keys'
+
+  repo-origin:
+    description: 'The origin, or name, for the apt repository. (optional, eg. `"My Apt Repository"`, default: `"Simple Apt Repository"`)'
+    required: false
+    default: 'Simple Apt Repository'
+
+  repo-label:
+    description: 'The label for the apt repository. (optional, eg. `"My Apt Repository"`, default: `"Simple Apt Repository"`)'
+    required: false
+    default: 'Simple Apt Repository'
+
+  repo-version:
+    description: 'The version for the apt repository. (optional, eg. `"1.0.0"`, default: `"1.0.0"`)'
+    required: false
+    default: '1.0.0'
+  
+  repo-description:
+    description: 'The description for the apt repository. (optional, eg. `"My Apt Repository"`, default: `"Simple Apt Repository"`)'
+    required: false
+    default: 'Simple Apt Repository'
+
+  key-type:
+    description: 'The type of key to use when generating new signing keys. (optional, eg. `"RSA"`, default: `"RSA"`)'
+    required: false
+    default: 'RSA'
+
+  key-length:
+    description: 'The length of the key to use when generating new signing keys. (optional, eg. `"4096"`, default: `"4096"`)'
+    required: false
+    default: '4096'
+
+  key-expire:
+    description: 'The expiration date for the key to use when generating new signing keys. (optional, eg. `"0"`, default: `"0"`)'
+    required: false
+    default: '0'
+
+  key-name:
+    description: 'The name of the key to use when generating new signing keys. (optional, eg. `"My Apt Repository"`, default: `"Simple Apt Repository"`)'
+    required: false
+    default: 'Simple Apt Repository'
+
+  key-email:
+    description: 'The email of the key to use when generating new signing keys. (optional, eg. `"example@example.com"`, default: `"example@example.com"`)'
+    required: false
+    default: 'example@example.com'
+
+  key-comment:
+    description: 'The comment of the key to use when generating new signing keys. (optional, eg. `"My Apt Repository"`, default: `"Simple Apt Repository"`)'
+    required: false
+    default: 'Simple Apt Repository'
+
+  key-passphrase:
+    description: 'The passphrase of the key to use when generating new signing keys. (optional, eg. `"My Apt Repository"`, default: `None`)'
+    required: false
+    # default: ''
+
+  key-public:
+    description: 'The public key to use when signing the apt repository and its contents. (optional, eg. `"-----BEGIN PGP PUBLIC KEY BLOCK-----\n..."`, default: `None`)'
+    required: false
+    # default: ''
+
+  key-private:
+    description: 'The private key to use when signing the apt repository and its contents. (optional, eg. `"-----BEGIN PGP PRIVATE KEY BLOCK-----\n..."`, default: `None`)'
+    required: false
+    # default: ''
+
+  key-public-path:
+    description: 'The path inside the container for the public key to use when signing the apt repository and its contents. (optional, eg. `"/my-key.pub"`, default: `None`)'
+    required: false
+    # default: ''
+
+  key-private-path:
+    description: 'The path inside the container for the private key to use when signing the apt repository and its contents. (optional, eg. `"/my-key"`, default: `None`)'
+    required: false
+    # default: ''
+
+  puid:
+    description: 'The user ID to use when running the container. (optional, eg. `"1000"`, default: `"1000"`)'
+    required: false
+    default: '1000'
+
+  pgid:
+    description: 'The group ID to use when running the container. (optional, eg. `"1000"`, default: `"1000"`)'
+    required: false
+    default: '1000'
+
+  user:
+    description: 'The user to use when running the container. (optional, eg. `"myuser"`, default: `"docker"`)'
+    required: false
+    default: 'docker'
+
+  group:
+    description: 'The group to use when running the container. (optional, eg. `"mygroup"`, default: `"docker"`)'
+    required: false
+    default: 'docker'
+
+  timezone:
+    description: 'The timezone to use when running the container. (optional, eg. `"America/New_York"`, default: `"UTC"`)'
+    required: false
+    default: 'UTC'
+
+# The outputs for the custom GitHub Action.
+# outputs:
+#   url:
+#     description: 'The URL of the hosted APT repository on GitHub pages.'
+
+# Define how to run the custom GitHub Action.
+runs:
+  using: 'docker'
+  # image: 'Dockerfile'
+  image: 'docker://ghcr.io/didstopia/simple-apt-repo:latest'
+  # args:
+  #   - ${{ inputs.token }}
+  env:
+    #
+    REPO_DIR: ${{ github.workspace }}/${{ inputs.repo-path }}
+    REPO_PACKAGES_DIR: ${{ github.workspace }}/${{ inputs.packages-path }}
+    REPO_KEYS_DIR: ${{ github.workspace }}/${{ inputs.keys-path }}
+    #
+    REPO_ORIGIN: ${{ inputs.repo-origin }}
+    REPO_LABEL: ${{ inputs.repo-label }}
+    REPO_VERSION: ${{ inputs.repo-version }}
+    REPO_DESCRIPTION: ${{ inputs.repo-description }}
+    #
+    REPO_KEY_TYPE: ${{ inputs.key-type }}
+    REPO_KEY_LENGTH: ${{ inputs.key-length }}
+    REPO_KEY_EXPIRE: ${{ inputs.key-expire }}
+    REPO_KEY_NAME: ${{ inputs.key-name }}
+    REPO_KEY_EMAIL: ${{ inputs.key-email }}
+    REPO_KEY_COMMENT: ${{ inputs.key-comment }}
+    REPO_KEY_PASSPHRASE: ${{ inputs.key-passphrase }}
+    REPO_KEY_PUBLIC: ${{ inputs.key-public }}
+    REPO_KEY_PRIVATE: ${{ inputs.key-private }}
+    REPO_KEY_PUBLIC_PATH: ${{ inputs.key-public-path }}
+    REPO_KEY_PRIVATE_PATH: ${{ inputs.key-private-path }}
+    #
+    PUID: ${{ inputs.puid }}
+    PGID: ${{ inputs.pgid }}
+    USER: ${{ inputs.user }}
+    GROUP: ${{ inputs.group }}
+    #
+    TZ: ${{ inputs.timezone }}

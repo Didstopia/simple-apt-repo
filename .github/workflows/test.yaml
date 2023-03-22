@@ -1,0 +1,59 @@
+name: Test
+
+# Only allow this workflow to run once per workflow and event type/number.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.number }}
+
+# Run this workflow every time a new commit pushed to any branch in your repository.
+on:
+  push:
+    # branches:
+    #   - master
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Run Custom Action
+        uses: ./
+        with:
+          timezone: Europe/Helsinki
+          repo-origin: Test Origin
+          repo-label: Test Label
+          repo-version: 0.1.2
+          repo-description: Test Description
+
+      - name: Verify Apt Repository
+        run: |
+          # Verify that the apt repository was created
+          # under GitHub Workspace path, with folders:
+          # - /repo
+          # - /packages
+          # - /keys
+          # None of these folders should be empty.
+          if [ ! -d "${GITHUB_WORKSPACE}/repo" ]; then
+            echo "The apt repository was not created under GitHub Workspace path."
+            ls -lah "${GITHUB_WORKSPACE}"
+            exit 1
+          fi
+          if [ ! -d "${GITHUB_WORKSPACE}/packages" ]; then
+            echo "The apt repository was not created under GitHub Workspace path."
+            ls -lah "${GITHUB_WORKSPACE}"
+            exit 1
+          fi
+          if [ ! -d "${GITHUB_WORKSPACE}/keys" ]; then
+            echo "The apt repository was not created under GitHub Workspace path."
+            ls -lah "${GITHUB_WORKSPACE}"
+            exit 1
+          fi
+          # if [ ! -d "/home/runner/work/simple-apt-repository/simple-apt-repository/repo" ]; then
+          #   echo "The apt repository was not created under GitHub Workspace path."
+          #   exit 1
+          # fi

@@ -2,12 +2,19 @@
 
 set -eo pipefail
 
-set -x
+# set -x
 
 # Set the default command to run if no command is specified
 if [ $# -eq 0 ]; then
   # set -- /bin/bash
   set -- /usr/local/bin/repo-update
+fi
+
+# Set the timezone from the TZ environment variable
+if [ -n "${TZ}" ]; then
+  echo "Setting timezone to ${TZ} ..."
+  ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime
+  echo "${TZ}" > /etc/timezone
 fi
 
 # Ensure the user with PUID and PGID exists

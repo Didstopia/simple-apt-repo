@@ -1,65 +1,5 @@
 #!/usr/bin/env bash
 
-# This script is part of a Dockerfile that is used to build an image which can both create and update
-# an apt repository. It is based on the official Debian Bullseye image, and adds
-# the necessary tools to create and update the repository.
-# 
-# It has the following features:
-# - Automatically create a new apt repository if it doesn't already exist in the
-#   /repo directory, including the necessary directories and files, as well as
-#   the Release and InRelease files, and the Packages/Packages.gz file
-# - Update an apt repository based on the contents of the /packages directory
-# - Automatically generates a GPG/PGP key pair, if they don't already exist,
-#   or if the user hasn't provided them as environment variables
-# - Automatically signs the Release file with the GPG/PGP key pair,
-#   creating the InRelease file
-# - Exposing the public key as part of the repository, so that clients can
-#   verify the authenticity of the repository and its packages easily
-# - Verifying packages in /packages using for example `dpkg-deb --info`,
-#   to verify that all required files are present, and that the package
-#   is not corrupt, and that it has all the metadata necessary, including a
-#   Description field
-# - Allowing the user to customize the entire process, by providing environment
-#   variables to the container, which will be used to set the paths used by
-#   the entrypoint script and the volumes, as well as the GPG/PGP key pair
-#   used to sign the repository, and anything else that would be useful
-# - Allows hosting packages for multiple different linux distributions,
-#   and multiple different architectures, by using environment variables
-#
-# dists\
-#       |--jessie/
-#       |--bullseye\
-#                   |Changelog
-#                   |Release
-#                   |InRelease
-#                   |Release.gpg
-#                   |--main\
-#                           |--amd64\
-#                           |--arm64\
-#                   |--contrib\
-#                   |--non-free\
-# pool\
-#      |--this is where the .deb files for all releases live
-#
-# The following environment variables are available:
-# - REPO_DIR: The directory where the repository will be created or updated, eg. "/repo"
-# - REPO_PACKAGES_DIR: The directory where the packages are located, eg. "/packages"
-# - REPO_KEYS_DIR: The directory where the GPG/PGP keys are located, eg. "/keys"
-#
-# - REPO_CODENAME: The codename of the repository, e.g. "bullseye"
-# - REPO_COMPONENTS: The components of the repository, e.g. "main,contrib,non-free"
-# - REPO_ARCHITECTURES: The architectures of the repository, e.g. "amd64,arm64,i386"
-#
-# - REPO_KEY_TYPE: The type of key to use, e.g. "RSA" or "DSA"
-# - REPO_KEY_LENGTH: The length of the key to use, e.g. 4096
-# - REPO_KEY_EXPIRE: The expiration date of the key, e.g. "0" for never
-# - REPO_KEY_NAME: The name of the key, e.g. "My Key"
-# - REPO_KEY_EMAIL: The email address of the key, e.g. "foo@bar.com"
-# - REPO_KEY_COMMENT: The comment of the key, e.g. "My Key Comment"
-# - REPO_KEY_PASSPHRASE: The passphrase of the key, e.g. "My Key Passphrase"
-# - REPO_KEY_PUBLIC: The public key to use, e.g. "-----BEGIN PGP PUBLIC KEY BLOCK-----..."
-# - REPO_KEY_PRIVATE: The private key to use, e.g. "-----BEGIN PGP PRIVATE KEY BLOCK-----..."
-
 set -eo pipefail
 
 # set -x
@@ -171,8 +111,8 @@ function updatePackages() {
   # Shorthand variables for the repo paths etc.
   ROOT="${REPO_DIR}"
   CODENAME="${REPO_CODENAME}"
-  COMPONENTS="${REPO_COMPONENTS}"
-  ARCHITECTURES="${REPO_ARCHITECTURES}"
+  # COMPONENTS="${REPO_COMPONENTS}"
+  # ARCHITECTURES="${REPO_ARCHITECTURES}"
 
   echo "Updating packages ..."
 

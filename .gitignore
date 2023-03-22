@@ -7,7 +7,11 @@
 
 # Allow GitHub files
 !.github/
-!.github/**/*
+!.github/workflows/
+!.github/workflows/*.yml
+!.github/workflows/*.yaml
+!action.yml
+!action.yaml
 
 # Allow Markdown files
 !*.md
