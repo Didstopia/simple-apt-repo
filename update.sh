@@ -9,12 +9,11 @@ rm -fr ~/.gnupg
 mkdir -p ~/.gnupg
 chmod 700 ~/.gnupg
 # export GPG_TTY=$(tty)
-# mkdir -p ~/.gnupg
-# touch ~/.gnupg/gpg.conf
-# echo "use-agent" >> ~/.gnupg/gpg.conf
-# echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-# touch ~/.gnupg/gpg-agent.conf
-# echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+touch ~/.gnupg/gpg.conf
+echo "use-agent" >> ~/.gnupg/gpg.conf
+echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+touch ~/.gnupg/gpg-agent.conf
+echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
 
 # Function for printing out information about the current user
 function printUser() {
@@ -39,7 +38,13 @@ function createKeys() {
   
     # Load the GPG keys
     echo "Loading existing GPG keys ..."
-    gpg --quiet --batch --import "${REPO_KEYS_DIR}/private.key"
+    if [[ -n "${REPO_KEY_PASSPHRASE}" ]]; then
+      gpg --quiet --batch --yes --passphrase "${REPO_KEY_PASSPHRASE}" --import "${REPO_KEYS_DIR}/private.key"
+    else
+      gpg --quiet --batch --yes --import "${REPO_KEYS_DIR}/private.key"
+    fi
+
+    # gpg --list-packets --verbose "${REPO_KEYS_DIR}/private.key"
 
     return
   fi
@@ -54,7 +59,13 @@ function createKeys() {
 
     # Load the GPG keys
     echo "Loading existing GPG keys ..."
-    gpg --quiet --batch --import "${REPO_KEYS_DIR}/private.key"
+    if [[ -n "${REPO_KEY_PASSPHRASE}" ]]; then
+      gpg --quiet --batch --yes --passphrase "${REPO_KEY_PASSPHRASE}" --import "${REPO_KEYS_DIR}/private.key"
+    else
+      gpg --quiet --batch --yes --import "${REPO_KEYS_DIR}/private.key"
+    fi
+
+    # gpg --list-packets --verbose "${REPO_KEYS_DIR}/private.key"
 
     return
   fi
@@ -72,19 +83,34 @@ function createKeys() {
   # that are empty or unset.
   # See here for more information:
   # https://www.gnupg.org/documentation/manuals/gnupg/Unattended-GPG-key-generation.html
-  # gpg --no-tty --batch --gen-key <<EOF
-  gpg --quiet --batch --gen-key <<EOF
+  if [[ -n "${REPO_KEY_PASSPHRASE}" ]]; then
+    gpg --quiet --batch --yes --gen-key <<EOF
 %echo Generating keys ...
 Key-Type: ${REPO_KEY_TYPE}
 Key-Length: ${REPO_KEY_LENGTH}
 Name-Real: ${REPO_KEY_NAME}
 Name-Email: ${REPO_KEY_EMAIL}
 Expire-Date: ${REPO_KEY_EXPIRE}
-$(if [[ -n "${REPO_KEY_COMMENT}" ]]; then echo "Name-Comment: ${REPO_KEY_COMMENT}"; fi)
-$(if [[ -n "${REPO_KEY_PASSPHRASE}" ]]; then echo "Passphrase: ${REPO_KEY_PASSPHRASE}"; else echo "%no-ask-passphrase"; echo "%no-protection"; fi)
+Name-Comment: ${REPO_KEY_COMMENT}
+Passphrase: ${REPO_KEY_PASSPHRASE}
 %commit
 %echo Successfully generated keys
 EOF
+  else
+    gpg --quiet --batch --yes --gen-key <<EOF
+%echo Generating keys ...
+Key-Type: ${REPO_KEY_TYPE}
+Key-Length: ${REPO_KEY_LENGTH}
+Name-Real: ${REPO_KEY_NAME}
+Name-Email: ${REPO_KEY_EMAIL}
+Name-Comment: ${REPO_KEY_COMMENT}
+Expire-Date: ${REPO_KEY_EXPIRE}
+%no-ask-passphrase
+%no-protection
+%commit
+%echo Successfully generated keys
+EOF
+  fi
 
   # Export the public key to the keys directory
   echo "Exporting public key ..."
@@ -92,16 +118,21 @@ EOF
 
   # Export the private key to the keys directory
   echo "Exporting private key ..."
-  gpg --quiet --armor --export-secret-keys "${REPO_KEY_EMAIL}" > "${REPO_KEYS_DIR}/private.key"
+  ## FIXME: This seems to export the private key without a passphrase, which is not ideal, and would
+  ##        defeat the whole purpose of having a passphrase, as then we can freely import it without the passphrase too..
+  if [[ -n "${REPO_KEY_PASSPHRASE}" ]]; then
+    gpg --quiet --batch --yes --armor --passphrase "${REPO_KEY_PASSPHRASE}" --export-secret-keys "${REPO_KEY_EMAIL}" > "${REPO_KEYS_DIR}/private.key"
+  else
+    gpg --quiet --batch --yes --armor --export-secret-keys "${REPO_KEY_EMAIL}" > "${REPO_KEYS_DIR}/private.key"
+  fi
 
   ## FIXME: Is the format of the filename correct? Is it even a GPG key, or is it actually a PGP key?!
   # Copy the public key to the root of the repository
   echo "Copying public key to repository root ..."
   cp "${REPO_KEYS_DIR}/public.key" "${REPO_DIR}/gpg-pubkey.asc"
 
-  # Convert the repo root public key from PGP to GPG
-  echo "Converting public key to GPG format ..."
-  
+  # TODO: Convert the repo root public key from PGP to GPG?
+  # echo "Converting public key to GPG format ..."
 
   echo "Successfully generated signing keys"
 }
@@ -319,7 +350,6 @@ function createRelease() {
 
   # Loop through the codenames, architectures and components
   # and store the results in the $CODENAMES, $ARCHITECTURES and $COMPONENTS variables
-  
 
   # Loop through the codenames
   for CODENAME in ${CODENAMES}; do
@@ -341,11 +371,13 @@ function createRelease() {
     # Sign the Release file
     echo "Creating signed Release.gpg file ..."
     rm -f "${ROOT}/dists/${CODENAME}/Release.gpg"
+    ## TODO: Do these need the --passphrase argument?
     gpg --quiet --batch --default-key "${REPO_KEY_EMAIL}" --output "${ROOT}/dists/${CODENAME}/Release.gpg" --detach-sig "${ROOT}/dists/${CODENAME}/Release"
 
     # Create the signed InRelease file
     echo "Creating signed InRelease file ..."
     rm -f "${ROOT}/dists/${CODENAME}/InRelease"
+    ## TODO: Do these need the --passphrase argument?
     gpg --quiet --default-key "${REPO_KEY_EMAIL}" --output "${ROOT}/dists/${CODENAME}/InRelease" --clearsign "${ROOT}/dists/${CODENAME}/Release"
 
     echo "Successfully created signed release files for ${CODENAME}"
