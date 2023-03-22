@@ -45,37 +45,39 @@ jobs:
 
       - name: Verify Results
         run: |
-          echo "Verifying the generated apt repository structure"
-          echo "- Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
+          echo "::notice::Verifying the generated apt repository structure"
+          echo "::notice::Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
           if [[ ! -d "${GITHUB_WORKSPACE}/repo" || ! "$(ls -A ${GITHUB_WORKSPACE}/repo)" ]]; then
-            echo "Error: missing or empty repo directory."
+            echo "::error::Missing or empty repo directory"
             ls -lah "${GITHUB_WORKSPACE}/repo"
             exit 1
           else
-            echo "Repo directory exists and is not empty:"
+            echo "::notice::Repo directory exists and is not empty"
             ls -lah "${GITHUB_WORKSPACE}/repo"
           fi
-          echo "- Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
-          if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
-            echo "Error: missing or empty packages directory."
+          #echo "::notice::Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
+          #if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
+          #  echo "::error::Missing or empty packages directory"
+          echo "::notice::Checking if packages path exists: ${GITHUB_WORKSPACE}/packages"
+          if [[ ! -d "${GITHUB_WORKSPACE}/packages" ]]; then
+            echo "::error::Missing packages directory"
             ls -lah "${GITHUB_WORKSPACE}/packages"
             exit 1
           else
-            echo "Packages directory exists and is not empty:"
+            echo "::notice::Packages directory exists"
             ls -lah "${GITHUB_WORKSPACE}/packages"
           fi
-          echo "- Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
-          # TODO: Check if the directory exists AND that it is NOT empty!
+          echo "::notice::Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
           if [[ ! -d "${GITHUB_WORKSPACE}/keys" || ! "$(ls -A ${GITHUB_WORKSPACE}/keys)" ]]; then
-            echo "Error: missing or empty keys directory."
+            echo "::error::Missing or empty keys directory"
             ls -lah "${GITHUB_WORKSPACE}/keys"
             exit 1
           else
-            echo "Keys directory exists and is not empty:"
+            echo "::notice::Keys directory exists and is not empty:"
             ls -lah "${GITHUB_WORKSPACE}/keys"
           fi
           ## TODO: Implement more tests here, to actually test for the
           ##       expected contents of the apt repository, like dists, pool etc.
           echo
-          echo "Checks passed, terminating ..."
+          echo "::notice::Checks passed, terminating"
           exit 0

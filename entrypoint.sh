@@ -12,17 +12,24 @@ fi
 
 # Set the timezone from the TZ environment variable
 if [ -n "${TZ}" ]; then
-  echo "Setting timezone to ${TZ} ..."
+  echo "::debug::Setting timezone to ${TZ} ..."
   ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime
   echo "${TZ}" > /etc/timezone
 fi
 
 # Ensure the user with PUID and PGID exists
 if ! id -u "${PUID}" > /dev/null 2>&1; then
-  echo "Creating a non-root user with PUID ${PUID} and PGID ${PGID} ..."
+  echo "::debug::Creating a non-root user with PUID ${PUID} and PGID ${PGID} ..."
   groupadd -g "${PGID}" ${GROUP}
   # useradd -u "$PUID" -o -m "$USER"
   useradd -u "${PUID}" -g "${PGID}" -o -m "${USER}"
+fi
+
+# If RUNNER_WORKSPACE is set and is not empty,
+# re-export GITHUB_WORKSPACE to be the same as RUNNER_WORKSPACE
+if [ -n "${RUNNER_WORKSPACE}" ]; then
+  echo "::debug::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting GITHUB_WORKSPACE to the same value ..."
+  export GITHUB_WORKSPACE="${RUNNER_WORKSPACE}"
 fi
 
 # If GITHUB_WORKSPACE is set, then we should modify the folder environment variables
@@ -30,22 +37,22 @@ fi
 if [ -n "${GITHUB_WORKSPACE}" ]; then
   # Verify that REPO_USE_RELATIVE is set to "true", otherwise skip this step
   if [[ $REPO_USE_RELATIVE = [Tt][Rr][Uu][Ee] ]]; then
-    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
+    echo "::debug::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
     export REPO_DIR="${GITHUB_WORKSPACE}/${REPO_DIR#/}"
     export REPO_PACKAGES_DIR="${GITHUB_WORKSPACE}/${REPO_PACKAGES_DIR#/}"
     export REPO_KEYS_DIR="${GITHUB_WORKSPACE}/${REPO_KEYS_DIR#/}"
   else
-    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
+    echo "::debug::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
   fi
 else
-  echo "GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
+  echo "::debug::GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
 fi
 
 echo
-echo "Starting with the following configuration:"
-echo "  Root Path: ${REPO_DIR}"
-echo "  Packages Path: ${REPO_PACKAGES_DIR}"
-echo "  Keys Path: ${REPO_KEYS_DIR}"
+echo "::debug::Starting with the following configuration:"
+echo "::debug::  Root Path: ${REPO_DIR}"
+echo "::debug::  Packages Path: ${REPO_PACKAGES_DIR}"
+echo "::debug::  Keys Path: ${REPO_KEYS_DIR}"
 echo
 
 # Ensure that the required directories exist
