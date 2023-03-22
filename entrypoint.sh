@@ -41,6 +41,13 @@ else
   echo "GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
 fi
 
+echo
+echo "Starting with the following configuration:"
+echo "  Root Path: ${REPO_DIR}"
+echo "  Packages Path: ${REPO_PACKAGES_DIR}"
+echo "  Keys Path: ${REPO_KEYS_DIR}"
+echo
+
 # Ensure that the required directories exist
 mkdir -p "${REPO_DIR}" "${REPO_PACKAGES_DIR}" "${REPO_KEYS_DIR}"
 

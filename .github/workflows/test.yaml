@@ -51,12 +51,18 @@ jobs:
             echo "Error: missing or empty repo directory."
             ls -lah "${GITHUB_WORKSPACE}/repo"
             exit 1
+          else
+            echo "Repo directory exists and is not empty:"
+            ls -lah "${GITHUB_WORKSPACE}/repo"
           fi
           echo "- Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
           if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
             echo "Error: missing or empty packages directory."
             ls -lah "${GITHUB_WORKSPACE}/packages"
             exit 1
+          else
+            echo "Packages directory exists and is not empty:"
+            ls -lah "${GITHUB_WORKSPACE}/packages"
           fi
           echo "- Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
           # TODO: Check if the directory exists AND that it is NOT empty!
@@ -64,6 +70,9 @@ jobs:
             echo "Error: missing or empty keys directory."
             ls -lah "${GITHUB_WORKSPACE}/keys"
             exit 1
+          else
+            echo "Keys directory exists and is not empty:"
+            ls -lah "${GITHUB_WORKSPACE}/keys"
           fi
           ## TODO: Implement more tests here, to actually test for the
           ##       expected contents of the apt repository, like dists, pool etc.

@@ -116,6 +116,9 @@ function updatePackages() {
 
   echo "Updating packages ..."
 
+  # Always ensure that the root, codename, dists and pool directories exist
+  mkdir -p "${ROOT}" "${ROOT}/dists/${CODENAME}" "${ROOT}/pool"
+
   # Recursively loop through all .deb files in the $REPO_PACKAGES_DIR,
   # using eg. `dpkg-deb --info` to get information about the package,
   # so we can figure out which codename, component and architecture
