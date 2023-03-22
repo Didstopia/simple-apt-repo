@@ -35,14 +35,16 @@ fi
 
 # HACK: Fix the GITHUB_WORKSPACE path inside containers being wrong (points to /github/workspace instead of /home/runner/work/<repo>/<repo>)
 if [ -n "${GITHUB_WORKSPACE}" ]; then
-  # If GITHUB_WORKSPACE is set to /github/workspace, then we need to fix it by setting it to RUNNER_WORKSPACE/<repo>
-  if [[ "${GITHUB_WORKSPACE}" = "/github/workspace" ]]; then
-    # Get the repository name from the GITHUB_REPOSITORY environment variable, which is in the format of <owner>/<repo>
-    REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
-    export WORKSPACE_PATH="${RUNNER_WORKSPACE}/${REPO_NAME}"
-    echo "::warning::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, overriding and setting it to ${WORKSPACE_PATH} instead ..."
-    export GITHUB_WORKSPACE="/home/runner/work/${GITHUB_REPOSITORY}"
-  fi
+  # # If GITHUB_WORKSPACE is set to /github/workspace, then we need to fix it by setting it to RUNNER_WORKSPACE/<repo>
+  # if [[ "${GITHUB_WORKSPACE}" = "/github/workspace" ]]; then
+  #   # Get the repository name from the GITHUB_REPOSITORY environment variable, which is in the format of <owner>/<repo>
+  #   REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
+  #   export WORKSPACE_PATH="${RUNNER_WORKSPACE}/${REPO_NAME}"
+  #   echo "::warning::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, overriding and setting it to ${WORKSPACE_PATH} instead ..."
+  #   export GITHUB_WORKSPACE="/home/runner/work/${GITHUB_REPOSITORY}"
+  # fi
+  export WORKSPACE_PATH="${GITHUB_WORKSPACE}"
+  mkdir -p "${WORKSPACE_PATH}"
 fi
 
 # Always export the WORKSPACE_PATH as an output variable
