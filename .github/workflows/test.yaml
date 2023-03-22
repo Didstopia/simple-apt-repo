@@ -28,6 +28,9 @@ jobs:
       - name: Run Custom Action
         uses: ./
         with:
+          ## FIXME: It looks like GH Actions doesn't apply defaults,
+          ##        so if we don't set these, the env vars will be empty?!
+          repo-relative: true
           image-version: master
           timezone: Europe/Helsinki
           repo-origin: Test Origin
