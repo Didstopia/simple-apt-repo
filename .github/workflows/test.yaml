@@ -4,6 +4,9 @@ name: Test
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.number }}
 
+# FIXME: Tests should additionally run _after_ publishing, to verify that the published
+#        newly created container image still works as expected!
+
 # Run this workflow every time a new commit pushed to any branch in your repository.
 on:
   push:
@@ -40,27 +43,22 @@ jobs:
           repo-version: 0.1.2
           repo-description: Test Description
 
-      - name: Verify Apt Repository
+      - name: Verify Results
         run: |
-          # Verify that the apt repository was created
-          # under GitHub Workspace path, with folders:
-          # - /repo
-          # - /packages
-          # - /keys
-          # None of these folders should be empty.
-          echo "Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
+          echo "Verifying the generated apt repository structure"
+          echo "- Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
           if [ ! -d "${GITHUB_WORKSPACE}/repo" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
             exit 1
           fi
-          echo "Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
+          echo "- Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
           if [ ! -d "${GITHUB_WORKSPACE}/packages" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
             exit 1
           fi
-          echo "Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
+          echo "- Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
           if [ ! -d "${GITHUB_WORKSPACE}/keys" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
@@ -68,5 +66,6 @@ jobs:
           fi
           ## TODO: Implement more tests here, to actually test for the
           ##       expected contents of the apt repository, like dists, pool etc.
+          echo
           echo "Checks passed, terminating ..."
           exit 0

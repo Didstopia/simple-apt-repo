@@ -20,6 +20,7 @@ on:
       - Test
     types:
       - completed
+    ## FIXME: Would this then also trigger for PRs and such? Because it shouldn't!
     branches:
       - master
   # Allow triggering manually.
