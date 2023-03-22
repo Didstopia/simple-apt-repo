@@ -8,13 +8,9 @@ LABEL maintainer="Didstopia <support@didstopia.com>"
 
 # Set the default environment variables
 ENV WORKSPACE_PATH=""
-# ENV REPO_USE_RELATIVE="true"
 ENV REPO_DIR="/repo" \
     REPO_PACKAGES_DIR="/packages" \
     REPO_KEYS_DIR="/keys"
-# ENV REPO_CODENAME="bullseye" \
-#     REPO_COMPONENTS="main,contrib,non-free" \
-#     REPO_ARCHITECTURES="amd64,arm64,i386"
 ENV REPO_ORIGIN="Example Repository" \
     REPO_LABEL="Example Repository" \
     REPO_VERSION="1.0" \

@@ -21,7 +21,6 @@ fi
 if ! id -u "${PUID}" > /dev/null 2>&1; then
   echo "::debug::Creating a non-root user with PUID ${PUID} and PGID ${PGID} ..."
   groupadd -g "${PGID}" ${GROUP}
-  # useradd -u "$PUID" -o -m "$USER"
   useradd -u "${PUID}" -g "${PGID}" -o -m "${USER}"
 fi
 
@@ -33,35 +32,30 @@ if [ -n "${RUNNER_WORKSPACE}" ]; then
   echo "::debug::RUNNER_WORKSPACE is set to ${RUNNER_WORKSPACE}"
 fi
 
-# HACK: Fix the GITHUB_WORKSPACE path inside containers being wrong (points to /github/workspace instead of /home/runner/work/<repo>/<repo>)
+# If GITHUB_WORKSPACE is set and WORKSPACE_PATH is not set, then set WORKSPACE_PATH to GITHUB_WORKSPACE
 if [ -n "${GITHUB_WORKSPACE}" ]; then
-  # # If GITHUB_WORKSPACE is set to /github/workspace, then we need to fix it by setting it to RUNNER_WORKSPACE/<repo>
-  # if [[ "${GITHUB_WORKSPACE}" = "/github/workspace" ]]; then
-  #   # Get the repository name from the GITHUB_REPOSITORY environment variable, which is in the format of <owner>/<repo>
-  #   REPO_NAME=$(echo "${GITHUB_REPOSITORY}" | cut -d'/' -f2)
-  #   export WORKSPACE_PATH="${RUNNER_WORKSPACE}/${REPO_NAME}"
-  #   echo "::warning::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, overriding and setting it to ${WORKSPACE_PATH} instead ..."
-  #   export GITHUB_WORKSPACE="/home/runner/work/${GITHUB_REPOSITORY}"
-  # fi
-  export WORKSPACE_PATH="${GITHUB_WORKSPACE}"
-  mkdir -p "${WORKSPACE_PATH}"
-fi
+  # If WORKSPACE_PATH is not set, then set it to GITHUB_WORKSPACE
+  if [ -z "${WORKSPACE_PATH}" ]; then
+    echo "::debug::GitHub workspace is set to ${GITHUB_WORKSPACE}, setting workspace path to match this ..."
 
-# Always export the WORKSPACE_PATH as an output variable
-echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
+    # Override the workspace path with the GitHub workspace path
+    export WORKSPACE_PATH="${GITHUB_WORKSPACE}"
+  fi
+
+  # Ensure that the WORKSPACE_PATH exists
+  mkdir -p "${WORKSPACE_PATH}"
+
+  # Export the WORKSPACE_PATH as an output variable
+  echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
+fi
 
 # If WORKSPACE_PATH is set, then we should modify the folder environment variables
 # so that they're relative to the WORKSPACE_PATH.
 if [ -n "${WORKSPACE_PATH}" ]; then
-  # Verify that REPO_USE_RELATIVE is set to "true", otherwise skip this step
-  # if [[ $REPO_USE_RELATIVE = [Tt][Rr][Uu][Ee] ]]; then
   echo "::notice::Detected workspace path as ${WORKSPACE_PATH}, adjusting repository root to be relative to the workspace path ..."
   export REPO_DIR="${WORKSPACE_PATH}/${REPO_DIR#/}"
   export REPO_PACKAGES_DIR="${WORKSPACE_PATH}/${REPO_PACKAGES_DIR#/}"
   export REPO_KEYS_DIR="${WORKSPACE_PATH}/${REPO_KEYS_DIR#/}"
-  # else
-  #   echo "::notice::Detected WORKSPACE_PATH set to ${WORKSPACE_PATH}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
-  # fi
 else
   echo "::debug::WORKSPACE_PATH is not set, skipping relative path adjustments ..."
 fi

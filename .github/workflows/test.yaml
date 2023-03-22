@@ -34,10 +34,6 @@ jobs:
         id: run-action
         uses: ./
         with:
-          ## FIXME: It looks like GH Actions doesn't apply defaults,
-          ##        so if we don't set these, the env vars will be empty?!
-          # repo-relative: true
-          # image-version: master
           timezone: Europe/Helsinki
           repo-origin: Test Origin
           repo-label: Test Label
@@ -50,16 +46,6 @@ jobs:
           # WORKSPACE_PATH: ${{ steps.run-action.outputs.workspace-path }}
           WORKSPACE_PATH: ${{ github.workspace }}
         run: |
-          
-          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
-          ls -lah "${GITHUB_WORKSPACE}" || true
-          echo "RUNNER_WORKSPACE: ${RUNNER_WORKSPACE}"
-          ls -lah "${RUNNER_WORKSPACE}" || true
-          echo "WORKSPACE_PATH: ${WORKSPACE_PATH}"
-          ls -lah "${WORKSPACE_PATH}" || true
-          
-          ls -lah "/github/workspace" || true
-
           echo "::notice::Verifying the generated apt repository structure"
           echo "::notice::Checking if repo path exists and is not empty: ${WORKSPACE_PATH}/repo"
           if [[ ! -d "${WORKSPACE_PATH}/repo" || ! "$(ls -A ${WORKSPACE_PATH}/repo)" ]]; then
