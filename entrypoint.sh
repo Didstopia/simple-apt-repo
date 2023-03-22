@@ -27,28 +27,39 @@ fi
 
 # If RUNNER_WORKSPACE is set and is not empty,
 # re-export GITHUB_WORKSPACE to be the same as RUNNER_WORKSPACE
-if [ -n "${RUNNER_WORKSPACE}" ]; then
-  echo "::notice::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting GITHUB_WORKSPACE to the same value ..."
-  export GITHUB_WORKSPACE="${RUNNER_WORKSPACE}"
+# if [ -n "${RUNNER_WORKSPACE}" ]; then
+#   echo "::notice::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting GITHUB_WORKSPACE to the same value ..."
+#   export GITHUB_WORKSPACE="${RUNNER_WORKSPACE}"
 
-  # Export GITHUB_WORKSPACE as an output variable
-  echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
+#   # Export GITHUB_WORKSPACE as an output variable
+#   echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
+# fi
+
+## TODO: If this works, we need to account for both GitHub and non-GitHub environments!
+if [ -n "${RUNNER_WORKSPACE}" ]; then
+  echo "::notice::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting WORKSPACE_PATH to the same value ..."
+  export WORKSPACE_PATH="${RUNNER_WORKSPACE}"
+
+  # Export WORKSPACE_PATH as an output variable
+  echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
 fi
+# WORKSPACE_PATH="${RUNNER_WORKSPACE:-$WORKSPACE_PATH}"
+# echo "workspace-path=${WORKSPACE_PATH}" >> $GITHUB_OUTPUT
 
 # If GITHUB_WORKSPACE is set, then we should modify the folder environment variables
 # so that they're relative to the GITHUB_WORKSPACE.
-if [ -n "${GITHUB_WORKSPACE}" ]; then
+if [[ -n "${WORKSPACE_PATH}" ]]; then
   # Verify that REPO_USE_RELATIVE is set to "true", otherwise skip this step
   if [[ $REPO_USE_RELATIVE = [Tt][Rr][Uu][Ee] ]]; then
-    echo "::notice::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
-    export REPO_DIR="${GITHUB_WORKSPACE}/${REPO_DIR#/}"
-    export REPO_PACKAGES_DIR="${GITHUB_WORKSPACE}/${REPO_PACKAGES_DIR#/}"
-    export REPO_KEYS_DIR="${GITHUB_WORKSPACE}/${REPO_KEYS_DIR#/}"
+    echo "::notice::Detected WORKSPACE_PATH set to ${WORKSPACE_PATH}, adjusting repository root to be relative to the workspace path ..."
+    export REPO_DIR="${WORKSPACE_PATH}/${REPO_DIR#/}"
+    export REPO_PACKAGES_DIR="${WORKSPACE_PATH}/${REPO_PACKAGES_DIR#/}"
+    export REPO_KEYS_DIR="${WORKSPACE_PATH}/${REPO_KEYS_DIR#/}"
   else
-    echo "::notice::Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
+    echo "::notice::Detected WORKSPACE_PATH set to ${WORKSPACE_PATH}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
   fi
 else
-  echo "::notice::GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
+  echo "::notice::WORKSPACE_PATH is not set, skipping relative path adjustments ..."
 fi
 
 echo

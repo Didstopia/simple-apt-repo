@@ -138,7 +138,7 @@ inputs:
 
 # The outputs for the custom GitHub Action.
 outputs:
-  GITHUB_WORKSPACE:
+  workspace-path:
     description: 'The actual path of the project workspace inside the container.'
 
 # Define how to run the custom GitHub Action.

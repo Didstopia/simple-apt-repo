@@ -46,41 +46,39 @@ jobs:
 
       - name: Verify Results
         env:
-          # Get GITHUB_WORKSPACE from the run-action's outputs.
-          GITHUB_WORKSPACE: ${{ steps.run-action.outputs.GITHUB_WORKSPACE }}
+          # Get workspace path from the run-action's outputs.
+          WORKSPACE_PATH: ${{ steps.run-action.outputs.workspace-path }}
         run: |
-          # echo "RUNNER_WORKSPACE: ${RUNNER_WORKSPACE}"
-          # ls -lah "${RUNNER_WORKSPACE}" || true
           echo "::notice::Verifying the generated apt repository structure"
-          echo "::notice::Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
-          if [[ ! -d "${GITHUB_WORKSPACE}/repo" || ! "$(ls -A ${GITHUB_WORKSPACE}/repo)" ]]; then
+          echo "::notice::Checking if repo path exists and is not empty: ${WORKSPACE_PATH}/repo"
+          if [[ ! -d "${WORKSPACE_PATH}/repo" || ! "$(ls -A ${WORKSPACE_PATH}/repo)" ]]; then
             echo "::error::Missing or empty repo directory"
-            ls -lah "${GITHUB_WORKSPACE}/repo"
+            ls -lah "${WORKSPACE_PATH}/repo"
             exit 1
           else
             echo "::notice::Repo directory exists and is not empty"
-            ls -lah "${GITHUB_WORKSPACE}/repo"
+            ls -lah "${WORKSPACE_PATH}/repo"
           fi
-          # cho "::notice::Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
-          # if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
+          # cho "::notice::Checking if packages path exists and is not empty: ${WORKSPACE_PATH}/packages"
+          # if [[ ! -d "${WORKSPACE_PATH}/packages" || ! "$(ls -A ${WORKSPACE_PATH}/packages)" ]]; then
           #   echo "::error::Missing or empty packages directory"
-          echo "::notice::Checking if packages path exists: ${GITHUB_WORKSPACE}/packages"
-          if [[ ! -d "${GITHUB_WORKSPACE}/packages" ]]; then
+          echo "::notice::Checking if packages path exists: ${WORKSPACE_PATH}/packages"
+          if [[ ! -d "${WORKSPACE_PATH}/packages" ]]; then
             echo "::error::Missing packages directory"
-            ls -lah "${GITHUB_WORKSPACE}/packages"
+            ls -lah "${WORKSPACE_PATH}/packages"
             exit 1
           else
             echo "::notice::Packages directory exists"
-            ls -lah "${GITHUB_WORKSPACE}/packages"
+            ls -lah "${WORKSPACE_PATH}/packages"
           fi
-          echo "::notice::Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
-          if [[ ! -d "${GITHUB_WORKSPACE}/keys" || ! "$(ls -A ${GITHUB_WORKSPACE}/keys)" ]]; then
+          echo "::notice::Checking if keys path exists and is not empty: ${WORKSPACE_PATH}/keys"
+          if [[ ! -d "${WORKSPACE_PATH}/keys" || ! "$(ls -A ${WORKSPACE_PATH}/keys)" ]]; then
             echo "::error::Missing or empty keys directory"
-            ls -lah "${GITHUB_WORKSPACE}/keys"
+            ls -lah "${WORKSPACE_PATH}/keys"
             exit 1
           else
             echo "::notice::Keys directory exists and is not empty:"
-            ls -lah "${GITHUB_WORKSPACE}/keys"
+            ls -lah "${WORKSPACE_PATH}/keys"
           fi
           ## TODO: Implement more tests here, to actually test for the
           ##       expected contents of the apt repository, like dists, pool etc.
