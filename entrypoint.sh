@@ -29,13 +29,13 @@ fi
 # so that they're relative to the GITHUB_WORKSPACE.
 if [ -n "${GITHUB_WORKSPACE}" ]; then
   # Verify that REPO_USE_RELATIVE is set to "true", otherwise skip this step
-  if [ "${REPO_USE_RELATIVE}" == "true" ]; then
+  if [[ $REPO_USE_RELATIVE = [Tt][Rr][Uu][Ee] ]]; then
     echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
     export REPO_DIR="${GITHUB_WORKSPACE}/${REPO_DIR}"
     export REPO_PACKAGES_DIR="${GITHUB_WORKSPACE}/${REPO_PACKAGES_DIR}"
     export REPO_KEYS_DIR="${GITHUB_WORKSPACE}/${REPO_KEYS_DIR}"
   else
-    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is not set to \"true\", skipping relative path adjustments ..."
+    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
   fi
 else
   echo "GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
