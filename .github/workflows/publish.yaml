@@ -7,21 +7,21 @@ concurrency:
 # Run this workflow every time a new commit pushed to the master branch in your repository.
 on:
   push:
-  #   branches:
-  #     - master
+    branches:
+      - master
     tags:
       - 'v*'
   #
   # Only run this workflow after the "Test" workflow has completed successfully.
   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run
   #
-  workflow_run:
-    workflows:
-      - Test
-    types:
-      - completed
-    branches:
-      - master
+  # workflow_run:
+  #   workflows:
+  #     - Test
+  #   types:
+  #     - completed
+  #   branches:
+  #     - master
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -30,7 +30,7 @@ jobs:
   publish:
     name: Publish
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
     timeout-minutes: 15
     steps:
 
