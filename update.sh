@@ -46,6 +46,14 @@ function createKeys() {
 
     # gpg --list-packets --verbose "${REPO_KEYS_DIR}/private.key"
 
+    ## FIXME: Is the format of the filename correct? Is it even a GPG key, or is it actually a PGP key?!
+    # Copy the public key to the root of the repository
+    echo "Copying public key to repository root ..."
+    cp "${REPO_KEYS_DIR}/public.key" "${REPO_DIR}/gpg-pubkey.asc"
+
+    # TODO: Convert the repo root public key from PGP to GPG?
+    # echo "Converting public key to GPG format ..."
+
     return
   fi
 
@@ -66,6 +74,14 @@ function createKeys() {
     fi
 
     # gpg --list-packets --verbose "${REPO_KEYS_DIR}/private.key"
+
+    ## FIXME: Is the format of the filename correct? Is it even a GPG key, or is it actually a PGP key?!
+    # Copy the public key to the root of the repository
+    echo "Copying public key to repository root ..."
+    cp "${REPO_KEYS_DIR}/public.key" "${REPO_DIR}/gpg-pubkey.asc"
+
+    # TODO: Convert the repo root public key from PGP to GPG?
+    # echo "Converting public key to GPG format ..."
 
     return
   fi
