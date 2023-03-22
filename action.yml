@@ -146,7 +146,9 @@ runs:
   using: 'docker'
   # image: 'Dockerfile'
   # image: 'docker://ghcr.io/didstopia/simple-apt-repo:latest'
-  image: 'docker://ghcr.io/didstopia/simple-apt-repo:${{ inputs.image-version }}}'
+  image: 'docker://ghcr.io/didstopia/simple-apt-repo:master'
+  ## FIXME: This doesn't actually work, it seems like GitHub Actions doesn't support using variables in the image name!
+  # image: 'docker://ghcr.io/didstopia/simple-apt-repo:${{ inputs.image-version }}}'
   # args:
   #   - ${{ inputs.token }}
   env:
