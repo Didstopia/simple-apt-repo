@@ -137,9 +137,9 @@ inputs:
     default: 'UTC'
 
 # The outputs for the custom GitHub Action.
-# outputs:
-#   url:
-#     description: 'The URL of the hosted APT repository on GitHub pages.'
+outputs:
+  GITHUB_WORKSPACE:
+    description: 'The actual path of the project workspace inside the container.'
 
 # Define how to run the custom GitHub Action.
 runs:

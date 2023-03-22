@@ -30,6 +30,9 @@ fi
 if [ -n "${RUNNER_WORKSPACE}" ]; then
   echo "::notice::Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, setting GITHUB_WORKSPACE to the same value ..."
   export GITHUB_WORKSPACE="${RUNNER_WORKSPACE}"
+
+  # Export GITHUB_WORKSPACE as an output variable
+  echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}" >> $GITHUB_OUTPUT
 fi
 
 # If GITHUB_WORKSPACE is set, then we should modify the folder environment variables

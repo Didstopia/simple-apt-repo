@@ -31,6 +31,7 @@ jobs:
       ##       test run, and make it unique, then use it for "image-version".
 
       - name: Run Custom Action
+        id: run-action
         uses: ./
         with:
           ## FIXME: It looks like GH Actions doesn't apply defaults,
@@ -44,9 +45,12 @@ jobs:
           repo-description: Test Description
 
       - name: Verify Results
+        env:
+          # Get GITHUB_WORKSPACE from the run-action's outputs.
+          GITHUB_WORKSPACE: ${{ steps.run-action.outputs.GITHUB_WORKSPACE }}
         run: |
-          echo "RUNNER_WORKSPACE: ${RUNNER_WORKSPACE}"
-          ls -lah "${RUNNER_WORKSPACE}" || true
+          # echo "RUNNER_WORKSPACE: ${RUNNER_WORKSPACE}"
+          # ls -lah "${RUNNER_WORKSPACE}" || true
           echo "::notice::Verifying the generated apt repository structure"
           echo "::notice::Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
           if [[ ! -d "${GITHUB_WORKSPACE}/repo" || ! "$(ls -A ${GITHUB_WORKSPACE}/repo)" ]]; then
@@ -57,9 +61,9 @@ jobs:
             echo "::notice::Repo directory exists and is not empty"
             ls -lah "${GITHUB_WORKSPACE}/repo"
           fi
-          #echo "::notice::Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
-          #if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
-          #  echo "::error::Missing or empty packages directory"
+          # cho "::notice::Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
+          # if [[ ! -d "${GITHUB_WORKSPACE}/packages" || ! "$(ls -A ${GITHUB_WORKSPACE}/packages)" ]]; then
+          #   echo "::error::Missing or empty packages directory"
           echo "::notice::Checking if packages path exists: ${GITHUB_WORKSPACE}/packages"
           if [[ ! -d "${GITHUB_WORKSPACE}/packages" ]]; then
             echo "::error::Missing packages directory"
