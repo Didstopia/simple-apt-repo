@@ -11,6 +11,11 @@ branding:
 # The inputs for the custom GitHub Action.
 inputs:
 
+  repo-relative:
+    description: 'Whether to use paths relative to the GitHub Workspace directory. (optional, eg. `"false"`, default: `"true"`)'
+    required: false
+    default: 'true'
+
   repo-path:
     description: 'The path inside the container for the apt repository root, relative to the GitHub Workspace path. (optional, eg. `"/my-repo"`, default: `"/repo"`)'
     required: false
@@ -140,9 +145,11 @@ runs:
   #   - ${{ inputs.token }}
   env:
     #
-    REPO_DIR: ${{ github.workspace }}/${{ inputs.repo-path }}
-    REPO_PACKAGES_DIR: ${{ github.workspace }}/${{ inputs.packages-path }}
-    REPO_KEYS_DIR: ${{ github.workspace }}/${{ inputs.keys-path }}
+    REPO_USE_RELATIVE: ${{ inputs.relative-path }}
+    #
+    REPO_DIR: ${{ inputs.repo-path }}
+    REPO_PACKAGES_DIR: ${{ inputs.packages-path }}
+    REPO_KEYS_DIR: ${{ inputs.keys-path }}
     #
     REPO_ORIGIN: ${{ inputs.repo-origin }}
     REPO_LABEL: ${{ inputs.repo-label }}
