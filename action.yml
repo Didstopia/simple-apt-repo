@@ -153,7 +153,7 @@ runs:
   #   - ${{ inputs.token }}
   env:
     #
-    REPO_USE_RELATIVE: ${{ inputs.relative-path }}
+    REPO_USE_RELATIVE: ${{ inputs.repo-relative }}
     #
     REPO_DIR: ${{ inputs.repo-path }}
     REPO_PACKAGES_DIR: ${{ inputs.packages-path }}
