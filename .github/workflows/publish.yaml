@@ -9,6 +9,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - 'v*'
   # Only run this workflow after the "Test" workflow has completed successfully.
   workflow_run:
     workflows:
@@ -48,12 +50,19 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ghcr.io/${{ github.repository }}
-          # tags: |
-          #   type=semver,pattern={{version}}
+          ## TODO: We need to start using semver tags for the container image,
+          ##       as this will ONLY create/update the "latest" tag for versioned releases!
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
 
       - name: Build and Publish
         uses: docker/build-push-action@v4
         with:
+          pull: true
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

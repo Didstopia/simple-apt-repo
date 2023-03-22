@@ -21,9 +21,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      ## TODO: Build the container image here, but don't publish it,
+      ##       then specify a tag that we will use for this specific
+      ##       test run, and make it unique, then use it for "image-version".
+
       - name: Run Custom Action
         uses: ./
         with:
+          image-version: master
           timezone: Europe/Helsinki
           repo-origin: Test Origin
           repo-label: Test Label
