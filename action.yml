@@ -16,10 +16,10 @@ inputs:
     required: false
     default: 'latest'
 
-  repo-relative:
-    description: 'Whether to use paths relative to the GitHub Workspace directory. (optional, eg. `"false"`, default: `"true"`)'
-    required: false
-    default: 'true'
+  # repo-relative:
+  #   description: 'Whether to use paths relative to the GitHub Workspace directory. (optional, eg. `"false"`, default: `"true"`)'
+  #   required: false
+  #   default: 'true'
 
   repo-path:
     description: 'The path inside the container for the apt repository root, relative to the GitHub Workspace path. (optional, eg. `"/my-repo"`, default: `"/repo"`)'
