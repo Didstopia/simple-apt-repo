@@ -27,26 +27,22 @@ fi
 
 # If GITHUB_WORKSPACE is set, then we should modify the folder environment variables
 # so that they're relative to the GITHUB_WORKSPACE.
-## FIXME: Remove these after done debugging!
-printenv
-echo "GITHUB_WORKSPACE is set to ${GITHUB_WORKSPACE}"
-ls -lah "${GITHUB_WORKSPACE}" || true
-echo "RUNNER_WORKSPACE is set to ${RUNNER_WORKSPACE}"
-ls -lah "${RUNNER_WORKSPACE}" || true
-if [ -n "${RUNNER_WORKSPACE}" ]; then
+if [ -n "${GITHUB_WORKSPACE}" ]; then
   # Verify that REPO_USE_RELATIVE is set to "true", otherwise skip this step
   if [[ $REPO_USE_RELATIVE = [Tt][Rr][Uu][Ee] ]]; then
-  # if [[ "${REPO_USE_RELATIVE}" = "true" ]]; then
-    echo "Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
-    export REPO_DIR="${RUNNER_WORKSPACE}/${REPO_DIR#/}"
-    export REPO_PACKAGES_DIR="${RUNNER_WORKSPACE}/${REPO_PACKAGES_DIR#/}"
-    export REPO_KEYS_DIR="${RUNNER_WORKSPACE}/${REPO_KEYS_DIR#/}"
+    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, adjusting repository root to be relative to the workspace path ..."
+    export REPO_DIR="${GITHUB_WORKSPACE}/${REPO_DIR#/}"
+    export REPO_PACKAGES_DIR="${GITHUB_WORKSPACE}/${REPO_PACKAGES_DIR#/}"
+    export REPO_KEYS_DIR="${GITHUB_WORKSPACE}/${REPO_KEYS_DIR#/}"
   else
-    echo "Detected RUNNER_WORKSPACE set to ${RUNNER_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
+    echo "Detected GITHUB_WORKSPACE set to ${GITHUB_WORKSPACE}, but REPO_USE_RELATIVE is set to \"${REPO_USE_RELATIVE}\", skipping relative path adjustments ..."
   fi
 else
-  echo "RUNNER_WORKSPACE is not set, skipping relative path adjustments ..."
+  echo "GITHUB_WORKSPACE is not set, skipping relative path adjustments ..."
 fi
+
+# Ensure that the required directories exist
+mkdir -p "${REPO_DIR}" "${REPO_PACKAGES_DIR}" "${REPO_KEYS_DIR}"
 
 # Ensure that the user with PUID and PGID owns all of the appropriate directories
 chown -R "${PUID}":"${PGID}" "${REPO_DIR}" "${REPO_PACKAGES_DIR}" "${REPO_KEYS_DIR}"

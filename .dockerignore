@@ -2,6 +2,10 @@
 .github/
 data/
 
+repo/
+packages/
+keys/
+
 .DS_Store
 Thumbs.db
 *.log
