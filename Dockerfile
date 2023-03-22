@@ -7,7 +7,7 @@ FROM debian:bullseye
 LABEL maintainer="Didstopia <support@didstopia.com>"
 
 # Set the default environment variables
-ENV REPO_USE_RELATIVE="false"
+ENV REPO_USE_RELATIVE="true"
 ENV REPO_DIR="/repo" \
     REPO_PACKAGES_DIR="/packages" \
     REPO_KEYS_DIR="/keys"

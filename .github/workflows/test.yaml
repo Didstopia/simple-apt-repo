@@ -43,22 +43,26 @@ jobs:
           # - /packages
           # - /keys
           # None of these folders should be empty.
+          echo "Checking if repo path exists and is not empty: ${GITHUB_WORKSPACE}/repo"
           if [ ! -d "${GITHUB_WORKSPACE}/repo" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
             exit 1
           fi
+          echo "Checking if packages path exists and is not empty: ${GITHUB_WORKSPACE}/packages"
           if [ ! -d "${GITHUB_WORKSPACE}/packages" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
             exit 1
           fi
+          echo "Checking if keys path exists and is not empty: ${GITHUB_WORKSPACE}/keys"
           if [ ! -d "${GITHUB_WORKSPACE}/keys" ]; then
             echo "The apt repository was not created under GitHub Workspace path."
             ls -lah "${GITHUB_WORKSPACE}"
             exit 1
           fi
-          # if [ ! -d "/home/runner/work/simple-apt-repository/simple-apt-repository/repo" ]; then
-          #   echo "The apt repository was not created under GitHub Workspace path."
-          #   exit 1
-          # fi
+          echo "Checking if repo path exists and is not empty: /home/runner/work/simple-apt-repository/simple-apt-repository/repo"
+          if [ ! -d "/home/runner/work/simple-apt-repository/simple-apt-repository/repo" ]; then
+            echo "The apt repository was not created under GitHub Workspace path."
+            exit 1
+          fi
