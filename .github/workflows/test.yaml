@@ -47,7 +47,8 @@ jobs:
       - name: Verify Results
         env:
           # Get workspace path from the run-action's outputs.
-          WORKSPACE_PATH: ${{ steps.run-action.outputs.workspace-path }}
+          # WORKSPACE_PATH: ${{ steps.run-action.outputs.workspace-path }}
+          WORKSPACE_PATH: ${{ github.workspace }}
         run: |
           
           echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
