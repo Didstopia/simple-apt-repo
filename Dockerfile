@@ -44,9 +44,15 @@ RUN mkdir -p "${REPO_DIR}" "${REPO_PACKAGES_DIR}" "${REPO_KEYS_DIR}"
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+## FIXME: Once the verification script is fixed, uncomment it below!
 # Copy the other scripts
 COPY update.sh /usr/local/bin/repo-update
-RUN chmod a+x /usr/local/bin/repo-update
+COPY verify.sh /usr/local/bin/repo-verify
+RUN echo "#!/usr/bin/env bash" > /usr/local/bin/repo-all && \
+    echo "#set -eo pipefail" >> /usr/local/bin/repo-all && \
+    echo "repo-update" >> /usr/local/bin/repo-all && \
+    echo "#repo-verify" >> /usr/local/bin/repo-all
+RUN chmod a+x /usr/local/bin/repo-*
 
 # Setup gosu for running as a non-root user
 RUN set -eux; \
@@ -77,4 +83,4 @@ VOLUME [ "${REPO_DIR}}", "${REPO_PACKAGES_DIR}", "${REPO_KEYS_DIR}" ]
 ENTRYPOINT [ "/entrypoint.sh" ]
 
 # Set the default command
-CMD [ "repo-update" ]
+CMD [ "repo-all" ]

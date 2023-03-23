@@ -206,7 +206,8 @@ function updatePackages() {
     mkdir -p "${DEB_DESTINATION}"
 
     # Create the appropriate repo component directories if they don't exist
-    mkdir -p "${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/${DEB_ARCHITECTURE}"
+    # mkdir -p "${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/${DEB_ARCHITECTURE}"
+    mkdir -p "${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/binary-${DEB_ARCHITECTURE}"
 
     # Copy the package to the destination directory
     cp -f "${DEB}" "${DEB_DESTINATION}/${DEB_FILENAME}"
@@ -219,7 +220,7 @@ function updatePackages() {
     POOL="${ROOT}/pool/${DEB_CODENAME}/${DEB_COMPONENT}"
 
     # Get the current Packages file based on the codename, component and architecture
-    PACKAGES_FILE="${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/${DEB_ARCHITECTURE}/Packages"
+    PACKAGES_FILE="${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/binary-${DEB_ARCHITECTURE}/Packages"
 
     # Update the Changelog file
     cat << EOF > "${ROOT}/dists/${DEB_CODENAME}/Changelog"
@@ -228,6 +229,9 @@ EOF
 
     # Update the Packages and Packages.gz files
     dpkg-scanpackages --arch "${ARCHITECTURE}" "${POOL}" > "${PACKAGES_FILE}" 2> /dev/null
+    # Edit in the "Filename" field in the Packages file so that the
+    # absolute path is instead relative, starting at "pool/"
+    sed -i "s|Filename: ${POOL}/|Filename: pool/|g" "${PACKAGES_FILE}"
     cat "${PACKAGES_FILE}" | gzip -9 > "${PACKAGES_FILE}.gz"
   done
 
@@ -336,6 +340,9 @@ function generateReleaseString() {
   # COMPONENTS=$(echo "${REPO_COMPONENTS}" | sed 's/,/ /g')
   local COMPONENTS="${3}"
 
+  # Transform COMPONENTS from an array to a space separated string
+  # COMPONENTS=$(echo "${COMPONENTS[@]}" | sed 's/ /,/g')
+
   # Generate the Release file contents
   # and print them as part of the console output.
   cat << EOF
@@ -369,15 +376,11 @@ function createRelease() {
 
   # Loop through the codenames
   for CODENAME in ${CODENAMES}; do
+    # Get the components
+    local COMPONENTS=$(getComponents "${CODENAME}")
+
     # Get the architectures
-    local ARCHITECTURES=$(getArchitectures "${CODENAME}")
-
-    # Get all the components for every architecture,
-    # combined into a single array, with no duplicates
-    local COMPONENTS=$(getComponents "${CODENAME}" "${ARCHITECTURES}")
-
-    # # Get the components
-    # COMPONENTS=$(getComponents "${CODENAME}" "${ARCHITECTURE}")
+    local ARCHITECTURES=$(getArchitectures "${CODENAME}" ${COMPONENTS})
 
     # Create the Release file
     echo "Creating Release file for ${CODENAME} ..."
@@ -423,29 +426,9 @@ function getCodenames() {
   echo "${CODENAMES_ARRAY[@]}"
 }
 
-# Function for getting the architectures
+# Function for getting the components
 # for a given codename, using the pool
 # directory structure
-function getArchitectures() {
-  # Shorthand variables for the repo paths etc.
-  local ROOT="${REPO_DIR}"
-
-  # Get the codename
-  local CODENAME="${1}"
-
-  # Get the architectures by getting the directory names in the codename directory
-  local ARCHITECTURES=$(find "${ROOT}/pool/${CODENAME}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
-
-  # Transform the architectures string into an array
-  IFS=' ' read -ra ARCHITECTURES_ARRAY <<< "${ARCHITECTURES}"
-
-  # Print the architectures array
-  echo "${ARCHITECTURES_ARRAY[@]}"
-}
-
-# Function for getting the components
-# for a given codename and architecture,
-# using the pool directory structure
 function getComponents() {
   # Shorthand variables for the repo paths etc.
   local ROOT="${REPO_DIR}"
@@ -453,36 +436,51 @@ function getComponents() {
   # Get the codename
   local CODENAME="${1}"
 
-  # Get the architecture
-  local ARCHITECTURE="${2}"
-
-  # If ARCHITECTURE is an array, then loop through it
-  # and get the components for every architecture
-  declare -a COMPONENTS
-  if [ -n "${ARCHITECTURE##* *}" ]; then
-    # ARCHITECTURE is not an array
-    # Get the components by getting the directory names in the codename/architecture directory
-    COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${ARCHITECTURE}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
-  else
-    # ARCHITECTURE is an array
-    # Loop through the architectures
-    for ARCHITECTURE in ${ARCHITECTURE}; do
-      # Get the components by getting the directory names in the codename/architecture directory
-      local ARCH_COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${ARCHITECTURE}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
-
-      # Append the components to the COMPONENTS array
-      COMPONENTS+=("${ARCH_COMPONENTS}")
-    done
-  fi
-
-  # # Get the components by getting the directory names in the codename/architecture directory
-  # COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${ARCHITECTURE}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  # Get the components by getting the directory names in the codename directory
+  local COMPONENTS=$(find "${ROOT}/pool/${CODENAME}" -mindepth 1 -maxdepth 1 -type d -printf "%f ")
 
   # Transform the components string into an array
   IFS=' ' read -ra COMPONENTS_ARRAY <<< "${COMPONENTS}"
 
   # Print the components array
   echo "${COMPONENTS_ARRAY[@]}"
+}
+
+# Function for getting the architectures
+# for a given codename and components,
+# using the pool directory structure
+function getArchitectures() {
+  # Shorthand variables for the repo paths etc.
+  local ROOT="${REPO_DIR}"
+
+  # Get the codename
+  local CODENAME="${1}"
+
+  # Get the component
+  local COMPONENTS="${2}"
+
+  # If COMPONENTS is an array, then loop through it
+  # and get the architectures for every architecture
+  declare -a ARCHITECTURES
+  if [ -n "${COMPONENTS##* *}" ]; then # COMPONENTS is not an array
+    # Get the architectures by getting the directory names in the codename/components directory
+    ARCHITECTURES=$(find "${ROOT}/pool/${CODENAME}/${COMPONENTS}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  else # COMPONENT is an array
+    # Loop through the architectures
+    for COMPONENT in ${COMPONENTS}; do
+      # Get the architectures by getting the directory names in the codename/components directory
+      local ARCH_COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${COMPONENT}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+
+      # Append the architectures to the ARCHITECTURES array
+      ARCHITECTURES+=("${ARCH_COMPONENTS}")
+    done
+  fi
+
+  # Transform the architectures string into an array
+  IFS=' ' read -ra ARCHITECTURES_ARRAY <<< "${ARCHITECTURES}"
+
+  # Print the architectures array
+  echo "${ARCHITECTURES_ARRAY[@]}"
 }
 
 # Function for generating a codename specific Changelog file
