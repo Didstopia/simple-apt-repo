@@ -255,16 +255,22 @@ function generateHashString() {
   # Shorthand variables for the repo paths etc.
   local ROOT="${REPO_DIR}"
 
+  SEARCH_PATH="${ROOT}/dists/${CODENAME}/"
+
   local HASH_NAME="${1}"
   local HASH_CMD="${2}"
   local CODENAME="${3}"
   echo "${HASH_NAME}:"
-  for f in $(find "${ROOT}/dists/${CODENAME}" -type f); do
+  for f in $(find "${SEARCH_PATH}" -type f); do
     if [[ "$f" == *"Release"* ]] || [[ "$f" == *"ChangeLog"* ]]; then
       continue
     fi
     # echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}+1))-)"
-    echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}))-)"
+    # echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}))-)"
+    FILE_HASH=$(${HASH_CMD} ${f}  | cut -d" " -f1)
+    FILE_SIZE=$(wc -c $f | cut -d" " -f1)
+    FILE_PATH=$(echo $f | cut -c$((${#SEARCH_PATH}+1))-)
+    echo " ${FILE_HASH} ${FILE_SIZE} ${FILE_PATH}"
   done
 }
 
@@ -313,7 +319,7 @@ function createRelease() {
   
   # Get all the codenames
   local CODENAMES=$(getCodenames)
-  echo "CODENAMES: ${CODENAMES}"
+  # echo "CODENAMES: ${CODENAMES}"
 
   # Loop through the codenames, architectures and components
   # and store the results in the $CODENAMES, $ARCHITECTURES and $COMPONENTS variables
@@ -322,11 +328,11 @@ function createRelease() {
   for CODENAME in ${CODENAMES}; do
     # Get the components
     local COMPONENTS=$(getComponents "${CODENAME}")
-    echo "COMPONENTS: ${COMPONENTS}"
+    # echo "COMPONENTS: ${COMPONENTS}"
 
     # Get the architectures
     local ARCHITECTURES=$(getArchitectures "${CODENAME}" ${COMPONENTS})
-    echo "ARCHITECTURES: ${ARCHITECTURES}"
+    # echo "ARCHITECTURES: ${ARCHITECTURES}"
 
     # Create the Release file
     echo "Creating Release file for ${CODENAME} ..."
