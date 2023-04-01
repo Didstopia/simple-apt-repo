@@ -17,7 +17,7 @@ echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
 
 # Function for printing out information about the current user
 function printUser() {
-  echo
+  # echo
   echo "Who am I? I am $(whoami)."
   echo "- My username is $(id -un)."
   echo "- My group is $(id -gn)."
@@ -157,7 +157,8 @@ EOF
 function updatePackages() {
   # Shorthand variables for the repo paths etc.
   ROOT="${REPO_DIR}"
-  CODENAME="${REPO_CODENAME}"
+  # CODENAME="${REPO_CODENAME}"
+  CODENAME="${REPO_DEFAULT_DISTRIBUTION}"
   # COMPONENTS="${REPO_COMPONENTS}"
   # ARCHITECTURES="${REPO_ARCHITECTURES}"
 
@@ -185,10 +186,12 @@ function updatePackages() {
     DEB_ARCHITECTURE=$(echo "${DEB_INFO}" | grep Architecture | awk '{print $2}')
 
     # Get the package component
-    DEB_COMPONENT=$(echo "${DEB_INFO}" | grep Section | awk '{print $2}')
+    # DEB_COMPONENT=$(echo "${DEB_INFO}" | grep Section | awk '{print $2}')
+    DEB_COMPONENT="${REPO_DEFAULT_COMPONENT}"
 
     # Get the package codename
-    DEB_CODENAME=$(echo "${DEB_INFO}" | grep Maintainer | awk '{print $2}' | cut -d' ' -f2)
+    # DEB_CODENAME=$(echo "${DEB_INFO}" | grep Maintainer | awk '{print $2}' | cut -d' ' -f2)
+    DEB_CODENAME="${CODENAME}"
 
     # Get the package name
     DEB_NAME=$(echo "${DEB_INFO}" | grep Package | awk '{print $2}')
@@ -199,8 +202,12 @@ function updatePackages() {
     # Get the package filename
     DEB_FILENAME="${DEB_NAME}_${DEB_VERSION}_${DEB_ARCHITECTURE}.deb"
 
+    # Get the first letter of the package name
+    DEB_NAME_FIRST_LETTER=$(echo "${DEB_NAME}" | cut -c1)
+
     # Get the package destination directory
-    DEB_DESTINATION="${ROOT}/pool/${DEB_CODENAME}/${DEB_COMPONENT}/${DEB_ARCHITECTURE}"
+    # DEB_DESTINATION="${ROOT}/pool/${DEB_CODENAME}/${DEB_COMPONENT}/${DEB_ARCHITECTURE}"
+    DEB_DESTINATION="${ROOT}/pool/${DEB_COMPONENT}/${DEB_NAME_FIRST_LETTER}/${DEB_NAME}"
 
     # Create the package destination directory if it doesn't exist
     mkdir -p "${DEB_DESTINATION}"
@@ -217,13 +224,15 @@ function updatePackages() {
     ##       then the codename and component directories, then run this once for those?
 
     # Get the current pool based on the codename, component and architecture
-    POOL="${ROOT}/pool/${DEB_CODENAME}/${DEB_COMPONENT}"
+    # POOL="${ROOT}/pool/${DEB_CODENAME}/${DEB_COMPONENT}"
+    POOL="${ROOT}/pool"
+    # POOL="${ROOT}/pool/${DEB_CODENAME}"
 
     # Get the current Packages file based on the codename, component and architecture
     PACKAGES_FILE="${ROOT}/dists/${DEB_CODENAME}/${DEB_COMPONENT}/binary-${DEB_ARCHITECTURE}/Packages"
 
     # Update the Changelog file
-    cat << EOF > "${ROOT}/dists/${DEB_CODENAME}/Changelog"
+    cat << EOF > "${ROOT}/dists/${DEB_CODENAME}/ChangeLog"
 $(date -R) - ${REPO_KEY_EMAIL}
 EOF
 
@@ -231,82 +240,15 @@ EOF
     dpkg-scanpackages --arch "${ARCHITECTURE}" "${POOL}" > "${PACKAGES_FILE}" 2> /dev/null
     # Edit in the "Filename" field in the Packages file so that the
     # absolute path is instead relative, starting at "pool/"
-    sed -i "s|Filename: ${POOL}/|Filename: pool/|g" "${PACKAGES_FILE}"
+    # sed -i "s|Filename: ${POOL}/|Filename: pool/|g" "${PACKAGES_FILE}" # NOTE: This doesn't work with VirtioFS currently
+    sed "s|Filename: ${POOL}/|Filename: pool/|g" "${PACKAGES_FILE}" > "${PACKAGES_FILE}.tmp"
+    cat "${PACKAGES_FILE}.tmp" > "${PACKAGES_FILE}"
+    rm "${PACKAGES_FILE}.tmp"
     cat "${PACKAGES_FILE}" | gzip -9 > "${PACKAGES_FILE}.gz"
   done
 
-  # This function will loop through the "pool" directory, looking for .deb files,
-  # and it will create a Packages file and a Packages.gz file, which will be used by
-  # apt to get information about the packages in the repository, and to download
-  # the packages themselves.
-
-  # # Get the repo components by splitting the $REPO_COMPONENTS string by comma
-  # IFS=',' read -ra COMPONENTS_ARRAY <<< "${COMPONENTS}"
-
-  # # Loop through the repo components
-  # for COMPONENT in "${COMPONENTS_ARRAY[@]}"; do
-  #   # Get the repo architectures by splitting the $REPO_ARCHITECTURES string by comma
-  #   IFS=',' read -ra ARCHITECTURES_ARRAY <<< "${ARCHITECTURES}"
-
-  #   # Loop through the repo architectures
-  #   for ARCHITECTURE in "${ARCHITECTURES_ARRAY[@]}"; do
-  #     # Get the current pool based on the codename, component and architecture
-  #     POOL="${ROOT}/pool/${CODENAME}/${COMPONENT}"
-
-  #     # Get the current Packages file based on the codename, component and architecture
-  #     PACKAGES_FILE="${ROOT}/dists/${CODENAME}/${COMPONENT}/${ARCHITECTURE}/Packages"
-
-  #     # Update the Packages and Packages.gz files
-  #     dpkg-scanpackages --arch "${ARCHITECTURE}" "${POOL}" > "${PACKAGES_FILE}"
-  #     cat "${PACKAGES_FILE}" | gzip -9 > "${PACKAGES_FILE}.gz"
-  #   done
-  # done
-
   echo "Successfully updated packages"
 }
-
-# # Function for updating the apt repository,
-# # including creating a new one if one doesn't already exist
-# function createRepo() {
-#   # Shorthand variables for the repo paths etc.
-#   ROOT="${REPO_DIR}"
-#   CODENAME="${REPO_CODENAME}"
-#   COMPONENTS="${REPO_COMPONENTS}"
-#   ARCHITECTURES="${REPO_ARCHITECTURES}"
-
-#   echo "Creating repository ..."
-
-#   # Ensure that the core repo directories exist
-#   mkdir -p "${ROOT}" "${ROOT}/dists" "${ROOT}/pool"
-
-#   # Ensure that the repo codename directory exists
-#   mkdir -p "${ROOT}/dists/${CODENAME}"
-
-#   # Get the repo components by splitting the $REPO_COMPONENTS string by comma
-#   IFS=',' read -ra COMPONENTS_ARRAY <<< "${COMPONENTS}"
-
-#   # Loop through the repo components
-#   for COMPONENT in "${COMPONENTS_ARRAY[@]}"; do
-#     # Ensure that each component directory exists
-#     mkdir -p "$ROOT/dists/${CODENAME}/${COMPONENT}" "${ROOT}/pool/${CODENAME}/${COMPONENT}"
-
-#     # Get the repo architectures by splitting the $REPO_ARCHITECTURES string by comma
-#     IFS=',' read -ra ARCHITECTURES_ARRAY <<< "${ARCHITECTURES}"
-
-#     # Loop through the repo architectures
-#     for ARCHITECTURE in "${ARCHITECTURES_ARRAY[@]}"; do
-#       # Ensure that each architecture directory exists
-#       mkdir -p "$ROOT/dists/${CODENAME}/${COMPONENT}/${ARCHITECTURE}"
-#     done
-#   done
-
-#   # - Ensure that the repo architectures directories exist, eg. $REPO_DIR/dists/$REPO_CODENAME/$REPO_COMPONENTS/$REPO_ARCHITECTURES (split $REPO_ARCHITECTURES string by comma)
-#   # - Ensure that the repo codename directory has the "Changelog", "Release", "InRelease" and "Release.gpg" files
-#   # - Ensure that the repo pool directory has the "Packages" and "Packages.gz" files (these should be auto-generated and updated eg. when .deb files change)
-
-#   echo "Successfully created repository"
-
-# }
 
 # Function for generating Release file hashes as a string
 function generateHashString() {
@@ -318,10 +260,11 @@ function generateHashString() {
   local CODENAME="${3}"
   echo "${HASH_NAME}:"
   for f in $(find "${ROOT}/dists/${CODENAME}" -type f); do
-    if [[ "$f" == *"Release"* ]]; then
+    if [[ "$f" == *"Release"* ]] || [[ "$f" == *"ChangeLog"* ]]; then
       continue
     fi
-    echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}+1))-)"
+    # echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}+1))-)"
+    echo " $(${HASH_CMD} ${f}  | cut -d" " -f1) $(wc -c $f | cut -d" " -f1) $(echo $f | cut -c$((${#ROOT}+${#CODENAME}))-)"
   done
 }
 
@@ -370,6 +313,7 @@ function createRelease() {
   
   # Get all the codenames
   local CODENAMES=$(getCodenames)
+  echo "CODENAMES: ${CODENAMES}"
 
   # Loop through the codenames, architectures and components
   # and store the results in the $CODENAMES, $ARCHITECTURES and $COMPONENTS variables
@@ -378,9 +322,11 @@ function createRelease() {
   for CODENAME in ${CODENAMES}; do
     # Get the components
     local COMPONENTS=$(getComponents "${CODENAME}")
+    echo "COMPONENTS: ${COMPONENTS}"
 
     # Get the architectures
     local ARCHITECTURES=$(getArchitectures "${CODENAME}" ${COMPONENTS})
+    echo "ARCHITECTURES: ${ARCHITECTURES}"
 
     # Create the Release file
     echo "Creating Release file for ${CODENAME} ..."
@@ -400,13 +346,6 @@ function createRelease() {
     gpg --quiet --default-key "${REPO_KEY_EMAIL}" --output "${ROOT}/dists/${CODENAME}/InRelease" --clearsign "${ROOT}/dists/${CODENAME}/Release"
 
     echo "Successfully created signed release files for ${CODENAME}"
-
-    # Loop through the architectures
-    # declare -a COMPONENTS
-    # for ARCHITECTURE in ${ARCHITECTURES}; do
-    #   # Get the components
-    #   COMPONENTS=$(getComponents "${CODENAME}" "${ARCHITECTURE}")
-    # done
   done
 }
 
@@ -417,7 +356,8 @@ function getCodenames() {
   local ROOT="${REPO_DIR}"
 
   # Get the codenames by getting the directory names in the pool directory
-  local CODENAMES=$(find "${ROOT}/pool" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  # local CODENAMES=$(find "${ROOT}/pool" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  local CODENAMES=$(find "${ROOT}/dists" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
 
   # Transform the codenames string into an array
   IFS=' ' read -ra CODENAMES_ARRAY <<< "${CODENAMES}"
@@ -437,7 +377,8 @@ function getComponents() {
   local CODENAME="${1}"
 
   # Get the components by getting the directory names in the codename directory
-  local COMPONENTS=$(find "${ROOT}/pool/${CODENAME}" -mindepth 1 -maxdepth 1 -type d -printf "%f ")
+  # local COMPONENTS=$(find "${ROOT}/pool/${CODENAME}" -mindepth 1 -maxdepth 1 -type d -printf "%f ")
+  local COMPONENTS=$(find "${ROOT}/pool" -mindepth 1 -maxdepth 1 -type d -printf "%f ")
 
   # Transform the components string into an array
   IFS=' ' read -ra COMPONENTS_ARRAY <<< "${COMPONENTS}"
@@ -459,22 +400,26 @@ function getArchitectures() {
   # Get the component
   local COMPONENTS="${2}"
 
+  ## FIXME: This needs to be fixed, so it recursively gets
+  ##        all architectures from the .deb files in the pool!
+
   # If COMPONENTS is an array, then loop through it
   # and get the architectures for every architecture
   declare -a ARCHITECTURES
-  if [ -n "${COMPONENTS##* *}" ]; then # COMPONENTS is not an array
-    # Get the architectures by getting the directory names in the codename/components directory
-    ARCHITECTURES=$(find "${ROOT}/pool/${CODENAME}/${COMPONENTS}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
-  else # COMPONENT is an array
-    # Loop through the architectures
-    for COMPONENT in ${COMPONENTS}; do
-      # Get the architectures by getting the directory names in the codename/components directory
-      local ARCH_COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${COMPONENT}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  # if [ -n "${COMPONENTS##* *}" ]; then # COMPONENTS is not an array
+  #   # Get the architectures by getting the directory names in the codename/components directory
+  #   ARCHITECTURES=$(find "${ROOT}/pool/${CODENAME}/${COMPONENTS}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
+  # else # COMPONENT is an array
+  #   # Loop through the architectures
+  #   for COMPONENT in ${COMPONENTS}; do
+  #     # Get the architectures by getting the directory names in the codename/components directory
+  #     local ARCH_COMPONENTS=$(find "${ROOT}/pool/${CODENAME}/${COMPONENT}" -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
 
-      # Append the architectures to the ARCHITECTURES array
-      ARCHITECTURES+=("${ARCH_COMPONENTS}")
-    done
-  fi
+  #     # Append the architectures to the ARCHITECTURES array
+  #     ARCHITECTURES+=("${ARCH_COMPONENTS}")
+  #   done
+  # fi
+  ARCHITECTURES+=("arm64")
 
   # Transform the architectures string into an array
   IFS=' ' read -ra ARCHITECTURES_ARRAY <<< "${ARCHITECTURES}"
@@ -495,7 +440,7 @@ function createChangelog() {
   for CODENAME in ${CODENAMES}; do
     # Create the Changelog file for the codename
     echo "Creating changelog file for ${CODENAME} ..."
-    cat << EOF > "${ROOT}/dists/${CODENAME}/Changelog"
+    cat << EOF > "${ROOT}/dists/${CODENAME}/ChangeLog"
 $(date -R) - ${REPO_KEY_EMAIL}
 EOF
   echo "Successfully created changelog file for ${CODENAME}"

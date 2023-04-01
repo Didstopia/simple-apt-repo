@@ -22,21 +22,16 @@ declare -A template=(
 
   # Repository, release and package information.
   ["dists"]=""
-    ["dists/*/arm64"]=""
-    ["dists/*/arm64/Packages"]=""
-    ["dists/*/arm64/Packages.gz"]=""
-    # ["dists/devel"]=""
-    #   ["dists/devel/arm64"]=""
-    #     ["dists/devel/arm64/Packages"]=""
-    #     ["dists/devel/arm64/Packages.gz"]=""
-    # ["dists/kernel"]=""
-    #   ["dists/kernel/arm64"]=""
-    #     ["dists/kernel/arm64/Packages"]=""
-    #     ["dists/kernel/arm64/Packages.gz"]=""
-    ["dists/Release"]=""
-    ["dists/Release.gpg"]=""
-    ["dists/InRelease"]=""
-    ["dists/Changelog"]=""
+    ["dists/bullseye"]=""
+      ["dists/bullseye/main"]
+        ["dists/bullseye/main/binary-arm64"]
+          ["dists/bullseye/main/binary-arm64/Packages"]=""
+          ["dists/bullseye/main/binary-arm64/Packages.gz"]=""
+        ["dists/bullseye/main/Contents-arm64.gz"]
+      ["dists/bullseye/Release"]=""
+      ["dists/bullseye/Release.gpg"]=""
+      ["dists/bullseye/InRelease"]=""
+      ["dists/bullseye/ChangeLog"]=""
 
   # Package binaries.
   ["pool"]=""
@@ -286,3 +281,11 @@ if [[ ! -z "$extra_paths" ]]; then
   echo
   render_tree "$(basename "${input_path}")" "${extra_paths}"
 fi
+
+# Exit with error code if any missing or extra files or directories are found.
+if [[ ! -z "$missing_paths" || ! -z "$extra_paths" ]]; then
+  exit 1
+fi
+
+# Otherwise, print success message.
+log "success" "Input path matches template"

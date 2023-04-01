@@ -8,6 +8,9 @@ LABEL maintainer="Didstopia <support@didstopia.com>"
 
 # Set the default environment variables
 ENV WORKSPACE_PATH=""
+ENV REPO_DEFAULT_DISTRIBUTION="bullseye" \
+    REPO_DEFAULT_COMPONENT="main" \
+    REPO_DEFAULT_COMPONENTS="main,contrib,non-free"
 ENV REPO_DIR="/repo" \
     REPO_PACKAGES_DIR="/packages" \
     REPO_KEYS_DIR="/keys"
@@ -51,7 +54,7 @@ COPY verify.sh /usr/local/bin/repo-verify
 RUN echo "#!/usr/bin/env bash" > /usr/local/bin/repo-all && \
     echo "#set -eo pipefail" >> /usr/local/bin/repo-all && \
     echo "repo-update" >> /usr/local/bin/repo-all && \
-    echo "#repo-verify" >> /usr/local/bin/repo-all
+    echo "#repo-verify ${REPO_DIR}" >> /usr/local/bin/repo-all
 RUN chmod a+x /usr/local/bin/repo-*
 
 # Setup gosu for running as a non-root user
